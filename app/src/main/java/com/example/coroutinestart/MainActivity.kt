@@ -1,83 +1,56 @@
 package com.example.coroutinestart
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import com.example.coroutinestart.databinding.ActivityMainBinding
-import kotlin.concurrent.thread
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
     private val binding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
-//    val handler = Handler()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         binding.buttonLoad.setOnClickListener {
-            load()
+            lifecycleScope.launch {
+                load()
+            }
         }
     }
-    private fun load() {
+
+    private suspend fun load() {
         binding.progress.isVisible = true
         binding.buttonLoad.isEnabled = false
-//        val tt = loadCity()
-//        binding.tvCityCount.text = tt
-        loadCity {
-            binding.tvCityCount.text = it
-//            val test = loadTemperature(it)
-            loadTemperature(it) {
-                binding.tvTemCount.text = it.toString()
-                binding.progress.isVisible = false
-                binding.buttonLoad.isEnabled = true
-            }
-//            binding.tvTemCount.text = test.toString()
-//            binding.progress.isVisible = false
-//            binding.buttonLoad.isEnabled = true
-        }
+        val tt = loadCity()
+        binding.tvCityCount.text = tt
 
-//val test = loadTemperature(tt)
-//        binding.tvTemCount.text = test.toString()
-//        binding.progress.isVisible = false
-//        binding.buttonLoad.isEnabled = true
+        val test = loadTemperature(tt)
+
+        binding.tvTemCount.text = test.toString()
+        binding.progress.isVisible = false
+        binding.buttonLoad.isEnabled = true
     }
 
-    private fun loadCity(callback: (String) -> Unit) {
-      thread {
-            Thread.sleep(5000)
-          runOnUiThread{
-//          Handler(Looper.getMainLooper()).post{
-//            handler.post {
-                callback.invoke("Tokyo")
-            }
-        }
-//        Thread.sleep(5000)
-//        return
+    private suspend fun loadCity(): String {
+        delay(5000)
+
+        return "Tokyo"
     }
 
-    private fun loadTemperature(city: String, callback: (Int) -> Unit) {
+    private suspend fun loadTemperature(city: String): Int {
 
-        thread {
-            runOnUiThread{
-//            Handler(Looper.getMainLooper()).post{
-//            handler.post {
-                Toast.makeText(this, "Temperature in $city 15 ", Toast.LENGTH_SHORT).show()
-            }
-            Thread.sleep(5000)
-            runOnUiThread {
-//            Handler(Looper.getMainLooper()).post{
-//                handler.post {
-                    callback.invoke(15)
-                }
-            }
+        Toast.makeText(this, "Temperature in $city 15 ", Toast.LENGTH_SHORT).show()
 
-        }
-//        Toast.makeText(this,"Temperature in $city 15 ",Toast.LENGTH_SHORT).show()
-//        Thread.sleep(5000)
-//        return  15
+        delay(5000)
+
+        return 15
     }
+
+}
